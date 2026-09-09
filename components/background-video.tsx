@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* A cover video that actually starts.
 
@@ -14,11 +14,18 @@ import { useEffect, useRef } from "react";
 export function BackgroundVideo({
   src,
   className = "",
+  eager = true,
 }: {
   src: string;
   className?: string;
+  /* Pass false below the fold. `preload="none"` is not enough on its own: it is
+     a hint, and a browser that ignores it pulls the whole file while the hero is
+     still loading. Withholding `src` until the element is near the viewport is
+     the only way to actually guarantee those bytes are not spent up front. */
+  eager?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const [live, setLive] = useState(eager);
 
   useEffect(() => {
     const el = ref.current;
@@ -26,7 +33,7 @@ export function BackgroundVideo({
 
     el.muted = true;
     const attempt = () => {
-      if (!el.paused) return;
+      if (!el.src || !el.paused) return;
       void el.play().catch(() => {});
     };
 
@@ -35,9 +42,15 @@ export function BackgroundVideo({
 
     const io = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) if (e.isIntersecting) attempt();
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          /* Scrolling this far takes far longer than buffering, so attaching
+             here is still comfortably ahead of the visitor. */
+          setLive(true);
+          attempt();
+        }
       },
-      { rootMargin: "200px" },
+      { rootMargin: "600px" },
     );
     io.observe(el);
 
@@ -50,12 +63,12 @@ export function BackgroundVideo({
   return (
     <video
       ref={ref}
-      src={src}
+      src={live ? src : undefined}
       autoPlay
       muted
       loop
       playsInline
-      preload="auto"
+      preload={eager ? "auto" : "metadata"}
       aria-hidden="true"
       className={className}
     />

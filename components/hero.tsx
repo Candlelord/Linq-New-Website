@@ -13,7 +13,7 @@ export function Hero() {
       className="relative h-[var(--screen-h)] w-full overflow-hidden bg-white"
     >
       <BackgroundVideo
-        src="/video/hero-clouds.mp4"
+        src="/video/clouds.mp4"
         className="absolute inset-0 h-full w-full object-cover"
       />
 

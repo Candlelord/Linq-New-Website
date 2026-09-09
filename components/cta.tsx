@@ -64,9 +64,14 @@ export function Cta() {
   return (
     <section className="flex h-[900px] w-full items-center justify-center overflow-clip bg-white py-[64px]">
       <div className="relative flex h-[650px] w-[1280px] flex-col items-center justify-center gap-[64px] overflow-clip rounded-[40px] bg-[#8a4fff] p-[128px]">
-        {/* Card artwork is a muted looping video, not a still. */}
+        {/* Card artwork is a muted looping video, not a still. It is the same
+            clip as the hero's — the two source files the designer supplied were
+            byte-identical — so pointing both at one URL means the browser
+            fetches it once. Give this its own file if the CTA ever gets a
+            different clip. */}
         <BackgroundVideo
-          src="/video/cta.mp4"
+          src="/video/clouds.mp4"
+          eager={false}
           className="absolute inset-0 z-0 h-full w-full object-cover"
         />
 
