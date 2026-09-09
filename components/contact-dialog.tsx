@@ -49,22 +49,29 @@ export function ContactDialog({
         className="absolute inset-0 h-full w-full cursor-default border-0 bg-black/50 p-0"
       />
 
+      {/* The dialog is shared by both trees, so its fixed 560px had to give on a
+          phone. Every size below is a min()/clamp() whose upper bound is the
+          original value, and the two line-heights are the same ratios written
+          unitless (46/40 = 1.15, 28/20 = 1.4). Viewport units ignore the body
+          `zoom` (playbook §6.3), so at any desktop width 100vw is the full
+          viewport and each one resolves to exactly what it was — 560, 48, 40,
+          20. Only a narrow viewport moves them. */}
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-title"
         tabIndex={-1}
-        className="relative w-[560px] rounded-[32px] bg-white p-[48px] outline-none"
+        className="relative w-[min(560px,calc(100vw-40px))] rounded-[32px] bg-white p-[clamp(24px,6vw,48px)] outline-none"
         style={{ boxShadow: "0 24px 80px rgba(23,11,46,0.28)" }}
       >
         <h2
           id="contact-title"
-          className="m-0 font-display text-[40px] leading-[46px] font-medium tracking-[-1.2px] text-black"
+          className="m-0 font-display text-[clamp(28px,7vw,40px)] leading-[1.15] font-medium tracking-[-1.2px] text-black"
         >
           Talk to us
         </h2>
-        <p className="mt-[12px] mb-[32px] text-[20px] leading-[28px] tracking-[-0.6px] text-black/70">
+        <p className="mt-[12px] mb-[32px] text-[clamp(16px,4.4vw,20px)] leading-[1.4] tracking-[-0.6px] text-black/70">
           Our team is on Telegram and answers there fastest. Send us a message
           and we&apos;ll pick it up.
         </p>

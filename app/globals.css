@@ -33,24 +33,50 @@
     --zoom: 0.44;
   }
 }
-@media (max-width: 630px) {
+/* Below the `md` breakpoint the scaled 1440 layout is not shown at all — the
+   mobile tree in app/page.tsx renders instead — so the ladder stops here and
+   the zoom is released. The steps this replaces (630 → 0.36, 515 → 0.30,
+   430 → 0.25, 358 → 0.21) shrank body copy to 8px and tap targets to 25px.
+
+   Nothing at or above 768px reads this block, so the desktop layout and the
+   960/760 tablet steps above are untouched.
+
+   `svh` rather than `vh`: on a phone `100vh` is the *largest* viewport, so a
+   hero sized to it hides behind the browser's address bar until the user
+   scrolls. `svh` is the smallest, which is the one that is always visible. */
+@media (max-width: 767px) {
   :root {
-    --zoom: 0.36;
+    --zoom: 1;
+    --screen-h: 100svh;
   }
 }
-@media (max-width: 515px) {
-  :root {
-    --zoom: 0.3;
+
+/* The desktop/mobile switch used by app/page.tsx.
+
+   Both are `display: contents` when shown, so the wrapper generates no box and
+   its children lay out exactly as if it were not there. That is load-bearing,
+   not tidiness: the footer's reveal is `position: sticky` and sticks within its
+   parent's box, so a real wrapper div — being exactly as tall as the footer —
+   would leave it nowhere to travel and the reveal would stop working. The same
+   applies to the sticky panel inside the "a smarter way to" section.
+
+   Written out here rather than as `contents max-md:hidden` utilities because
+   both set `display` at equal specificity, which leaves the winner down to the
+   order Tailwind happens to emit them in. */
+.desktop-only,
+.mobile-only {
+  display: contents;
+}
+
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none;
   }
 }
-@media (max-width: 430px) {
-  :root {
-    --zoom: 0.25;
-  }
-}
-@media (max-width: 358px) {
-  :root {
-    --zoom: 0.21;
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
   }
 }
 
