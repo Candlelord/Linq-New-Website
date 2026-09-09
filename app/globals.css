@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #e5d5ff;
+  --color-brand-200: #bc97ff;
+  --color-brand-400: #8a4fff;
+  --color-brand-500: #6a30df;
+  --color-brand-700: #3e0d9f;
+
+  --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The layout is authored at a fixed 1440px. 0.67 is the zoom the site is tuned
+   to look right at on desktop, and it fits any viewport down to ~965px. Below
+   that the ladder keeps stepping down so the whole 1440 layout still fits
+   rather than overflowing — a stopgap for small screens, not a responsive
+   design: nothing reflows, it only scales. */
+:root {
+  --zoom: 0.67;
+  /* Viewport units ignore `zoom`, so anything sized to the screen has to divide
+     it back out or it renders at --zoom of the intended height. */
+  --screen-h: calc(100vh / var(--zoom));
+}
+
+@media (max-width: 960px) {
+  :root {
+    --zoom: 0.53;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    --zoom: 0.44;
+  }
+}
+@media (max-width: 630px) {
+  :root {
+    --zoom: 0.36;
+  }
+}
+@media (max-width: 515px) {
+  :root {
+    --zoom: 0.3;
+  }
+}
+@media (max-width: 430px) {
+  :root {
+    --zoom: 0.25;
+  }
+}
+@media (max-width: 358px) {
+  :root {
+    --zoom: 0.21;
+  }
+}
+
+html {
+  overflow-x: hidden;
+  /* Page still scrolls; the bar itself is hidden, matching the menu overlay. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  zoom: var(--zoom);
+  background: #000000;
+  font-family: var(--font-body);
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The menu overlay fades both ways — measured off the live site, ~440ms on a
+   symmetric ease-in-out, no slide or wipe.
+
+   In and out are two separate names on purpose. Re-pointing one finished
+   animation at itself with `direction: reverse` does not restart it: the
+   element is already past the end, so it snaps straight to the reversed fill
+   value. That is why closing used to vanish with no transition. A different
+   animation-name is a different animation, and starts from time zero. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes menu-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The live buttons are inert — no hover state at all. This gives them the
+   tactile feedback they were missing: a lift and a glow under the pointer, and
+   a real press on click that snaps down fast and eases back up.
+
+   The glow rides on `filter` rather than `box-shadow` because every one of
+   these buttons already carries an inline inset highlight that a stylesheet
+   rule cannot override. */
+.pressable {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease-out;
+}
+
+.pressable:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.12) drop-shadow(0 10px 20px rgba(138, 79, 255, 0.35));
+}
+
+.pressable:active {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(0.95);
+  transition-duration: 0.08s;
+}
+
+.pressable:focus-visible {
+  outline: 2px solid #8a4fff;
+  outline-offset: 4px;
+}
+
+/* Mouse-trail image wipes in from the top. */
+@keyframes wipe-down {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Feature cards. Both are mirrored tweens, so `alternate` supplies the return
+   leg and the easing stays symmetric in both directions. The from/to values
+   arrive as custom properties because every card and coin has its own base
+   pose — a shared keyframe would otherwise reset the rotation to zero. */
+@keyframes card-wobble {
+  from {
+    transform: rotate(var(--wob-from));
+  }
+  to {
+    transform: rotate(var(--wob-to));
+  }
+}
+
+@keyframes coin-float {
+  from {
+    transform: translate(var(--fx-from, 0px), var(--fy-from, 0px))
+      rotate(var(--coin-rot, 0deg));
+  }
+  to {
+    transform: translate(var(--fx-to, 0px), var(--fy-to, 0px))
+      rotate(var(--coin-rot, 0deg));
+  }
+}
+
+/* Testimonial cards hang off a rail and rock 1° on a 833ms mirrored tween. */
+@keyframes card-swing {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
