@@ -1,10 +1,10 @@
 import { BackgroundVideo } from "@/components/background-video";
 import { links, APP_DOMAIN } from "@/lib/links";
 
-/* Phone version of the closing call to action. The desktop original is a
-   1280×650 card inside a 900px band with 128px of padding; here the card goes
-   full-bleed-with-a-margin and the padding comes down to something a 360px
-   screen can spare.
+/* Phone version of the closing call to action. Like the desktop one it now runs
+   full-bleed — no inset card, no radius, video edge to edge — following the
+   Framer change. On a phone that also buys back the 40px the side margins were
+   costing the copy.
 
    The store buttons keep their measured 220×60 — that is already a comfortable
    tap target and it fits across a phone — but they stack, because two 220px
@@ -70,16 +70,16 @@ function StoreButton({
 
 export function MobileCta() {
   return (
-    <section className="w-full bg-white px-[20px] py-[48px]">
-      <div className="relative mx-auto flex max-w-[520px] flex-col items-center gap-[36px] overflow-clip rounded-[32px] bg-[#8a4fff] px-[24px] py-[56px]">
-        {/* Same clip as the hero's — one file, fetched once. */}
-        <BackgroundVideo
-          src="/video/clouds.mp4"
-          eager={false}
-          className="absolute inset-0 z-0 h-full w-full object-cover"
-        />
+    <section className="relative w-full overflow-clip bg-[#8a4fff] px-[20px] py-[72px]">
+      {/* Same clip as the hero's — one file, fetched once. */}
+      <BackgroundVideo
+        src="/video/clouds.mp4"
+        eager={false}
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+      />
 
-        <div className="relative z-[1] flex w-full flex-col items-center gap-[36px]">
+      <div className="relative z-[1] mx-auto flex max-w-[520px] flex-col items-center gap-[36px]">
+        <div className="flex w-full flex-col items-center gap-[36px]">
           <div className="flex flex-col items-center gap-[8px]">
             <h2 className="m-0 text-center font-display text-[clamp(28px,7.6vw,38px)] leading-[1.12] font-medium tracking-[-0.03em] text-white">
               Ready to Move Your Money?
