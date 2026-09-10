@@ -137,6 +137,12 @@
 @media (max-width: 810px) {
   :root {
     --zoom: 1;
+    /* `svh`, not `vh`: on a phone `100vh` is the *largest* viewport — the one
+       with the address bar retracted — so a hero sized to it hides its CTAs
+       behind that bar until the user scrolls. `svh` is the smallest, which is
+       the height that is always on screen. Measured geometry is unaffected; at
+       a fixed 844 viewport the two are identical. */
+    --screen-h: 100svh;
 
     --burger-size: 51px;
     --burger-size-hover: 48.45px;

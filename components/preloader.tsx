@@ -169,10 +169,15 @@ export function Preloader() {
         width={300}
         height={86}
         aria-hidden
+        className="h-auto w-[min(300px,60vw)]"
       />
 
       <div className="flex flex-col items-center gap-[24px]">
-        <div className="h-[4px] w-[440px] overflow-hidden rounded-full bg-white/12">
+        {/* 440px overflows a phone once the body zoom is released below md.
+            min() keeps it at exactly 440 on any desktop width — viewport units
+            ignore the zoom (playbook §6.3), so 100vw there is the full viewport
+            and the first term always wins. */}
+        <div className="h-[4px] w-[min(440px,calc(100vw-80px))] overflow-hidden rounded-full bg-white/12">
           <div
             ref={barRef}
             data-bar
