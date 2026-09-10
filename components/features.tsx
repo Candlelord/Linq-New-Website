@@ -26,16 +26,19 @@ const CARD =
 type Coin = {
   left: number;
   top: number;
-  from: string;
-  to: string;
-  disc: string;
-  icon: string;
+  from?: string;
+  to?: string;
+  disc?: string;
+  icon?: string;
   alt: string;
-  /* Icon box inside the 99px disc. */
-  ix: number;
-  iy: number;
-  iw: number;
-  ih: number;
+  /* Icon box inside the 99px disc. Omitted when `art` supplies the whole coin. */
+  ix?: number;
+  iy?: number;
+  iw?: number;
+  ih?: number;
+  /* A coin supplied as one finished piece of art — disc, rim and glyph already
+     composed — rather than assembled from `from`/`to`/`disc` plus a glyph. */
+  art?: string;
   /* Static pose of the whole coin, and of the glyph within it. */
   rot?: number;
   iconRot?: number;
@@ -59,8 +62,10 @@ const CARD1_COINS: Coin[] = [
   },
 ];
 
-/* Bitcoin and Tron resolve to byte-identical glyphs on the live site — the red
-   coin carries the ₿ mark. Reproduced as-is; it is the designer's call to fix. */
+/* Bitcoin and Tron resolved to byte-identical glyphs on the live site — the red
+   coin carried the ₿ mark. That coin is now the designer's Stellar render, which
+   arrives as one finished piece of art rather than a colour triple plus a glyph,
+   so it goes in through `art`. Its position and drift are unchanged. */
 const CARD2_COINS: Coin[] = [
   {
     left: 31, top: 60,
@@ -70,9 +75,8 @@ const CARD2_COINS: Coin[] = [
   },
   {
     left: 260, top: 34,
-    from: "rgb(255,89,92)", to: "rgb(168,0,3)", disc: "rgb(255,6,10)",
-    icon: "/images/features/tron.svg", alt: "Tron",
-    ix: 22, iy: 15, iw: 52, ih: 67, fx: -4, fy: -7,
+    art: "/images/features/stellar.svg", alt: "Stellar",
+    fx: -4, fy: -7,
   },
   {
     left: 161.25, top: 148,
@@ -94,12 +98,23 @@ const CARD2_COINS: Coin[] = [
   },
 ];
 
+/* The supplied Stellar art is a 120-box whose coin measures 109.513 across —
+   2 × (r 52.4265 + half the 4.66013 rim stroke). Drawing it at 107 like every
+   other coin therefore means a 117.246 box pulled back 5.123 on each axis, so
+   the painted edge lands on 107 rather than the file's bounding box doing. */
+const ART_BOX = 117.246;
+const ART_INSET = -5.123;
+
 function CoinBadge({ coin }: { coin: Coin }) {
   const rot = coin.rot ?? 0;
   const style: CSSProperties & Record<string, string | number> = {
     left: coin.left,
     top: coin.top,
-    backgroundImage: `linear-gradient(${coin.from} 35%, ${coin.to} 100%)`,
+    ...(coin.art
+      ? {}
+      : {
+          backgroundImage: `linear-gradient(${coin.from} 35%, ${coin.to} 100%)`,
+        }),
     transform: `translate(0px, 0px) rotate(${rot}deg)`,
     "--coin-rot": `${rot}deg`,
     "--fx-from": "0px",
@@ -108,6 +123,24 @@ function CoinBadge({ coin }: { coin: Coin }) {
     "--fy-to": `${coin.fy ?? 0}px`,
     animation: `coin-float 1.9s ${EASE} infinite alternate`,
   };
+
+  if (coin.art) {
+    return (
+      <div className="absolute h-[107px] w-[107px]" style={style}>
+        <img
+          src={coin.art}
+          alt={coin.alt}
+          className="absolute max-w-none"
+          style={{
+            left: ART_INSET,
+            top: ART_INSET,
+            width: ART_BOX,
+            height: ART_BOX,
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="absolute h-[107px] w-[107px] rounded-full" style={style}>
