@@ -1,10 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
-  <circle cx="120" cy="120" r="120" fill="#000000"/>
-  <!-- Built from primitives rather than hand-written beziers: a ring, a black
-       band that breaks it, then the white sweep sitting in that break. -->
-  <g transform="rotate(-22 120 120)">
-    <circle cx="120" cy="120" r="56" fill="none" stroke="#ffffff" stroke-width="15"/>
-    <rect x="10" y="103" width="220" height="34" fill="#000000"/>
-    <rect x="18" y="112" width="204" height="16" rx="8" fill="#ffffff"/>
+<!-- The designer's Stellar render, same artwork as public/images/features/stellar.svg.
+     Replaces the placeholder vector drawn from primitives to imitate the other
+     marks' flat-on-black treatment, which chains.tsx asked to swap out once a
+     real render existed.
+
+     The only difference from the features copy is the viewBox. That file is a 120
+     box whose coin measures 109.513 across, being twice (r 52.4265 plus half the
+     4.66013 rim stroke), so it carries 5.243 of empty margin on each side. The
+     features card compensates in CSS, drawing it into an oversized box pulled back
+     by that margin. The ticker cannot: its pills paint every logo at exactly the
+     chain-icon custom property and the other five are PNGs that fill their box
+     edge to edge, so this art dropped in at 120 would render Stellar about 6px
+     smaller than its neighbours.
+
+     Cropping the viewBox to the painted coin instead makes the file fill its own
+     box like the PNGs do, so it needs no component or CSS change at either
+     breakpoint. The gradient is userSpaceOnUse and its coordinates are unchanged,
+     so the rim still runs top to bottom across the coin exactly as supplied.
+
+     Note for editors: this is XML, so a double hyphen cannot appear inside a
+     comment. Writing the custom property with its real prefix here silently
+     breaks the parse and the ticker renders a broken-image icon. -->
+<svg width="109.513" height="109.513" viewBox="5.2435 5.2435 109.513 109.513" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rim" x1="60.0" y1="7.574" x2="60.0" y2="112.427" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F4F55"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60.0" cy="60.0" r="52.4265" fill="#0A0A0A"/>
+  <circle cx="60.0" cy="60.0" r="52.4265" stroke="url(#rim)" stroke-width="4.66013"/>
+  <g transform="translate(7.6875 9.1875) scale(3.276656)">
+    <path d="M23.13 9.292l-2.4 1.224-11.598 5.907A6.909 6.909 0 0119.35 9.498l1.374-.7.205-.105a8.439 8.439 0 00-13.371 7.472 1.535 1.535 0 01-.834 1.484l-.725.37v1.724l2.134-1.088.691-.353.681-.347 12.226-6.23 1.374-.699 2.84-1.447V7.856L23.13 9.292zm2.816 2.012L10.201 19.32l-1.374.7L6 21.463v1.723l2.808-1.43 2.401-1.224 11.61-5.916a6.909 6.909 0 01-10.229 6.93l-.085.045-1.49.76a8.439 8.439 0 0013.372-7.475 1.536 1.536 0 01.833-1.483l.726-.37v-1.718z" fill="#FFFFFF"/>
   </g>
 </svg>

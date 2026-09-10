@@ -7,9 +7,11 @@
    as custom properties (see globals.css) because the track width they feed is
    needed in JS, not just in a class. */
 /* Order matches the live ticker; names verified against each downloaded file.
-   Stellar is not on the live site — its mark is a vector drawn to match the
-   others' flat-on-black treatment, so swap in the designer's render when there
-   is one. */
+   Stellar is not on the live site. It now carries the designer's render — the
+   same artwork the multiple-chain feature card uses — in place of the vector
+   that had been drawn to imitate the others' flat-on-black treatment. The file
+   is the features one with its viewBox cropped to the painted coin, so it fills
+   its box like the five PNGs beside it and needs no sizing of its own. */
 const CHAINS = [
   { name: "Polygon", src: "/images/chains/0.png" },
   { name: "Aptos", src: "/images/chains/1.png" },
