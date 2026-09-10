@@ -19,9 +19,15 @@ const SPRING = "cubic-bezier(0.34, 1.32, 0.64, 1)";
    face "Mozilla Headline SemiCondensed": measured against the live word widths
    at 45px, 112.5% on the width axis puts "BUY CRYPTO" at 279.2 against a live
    278.2. That is what makes "A SMARTER WAY TO" overrun the 341px column and
-   wrap after "SMARTER", exactly as live does. Desktop keeps its 87.5%. */
+   wrap after "SMARTER", exactly as live does. Desktop keeps its 87.5%.
+
+   Size and line-height come from --sw-fs / --sw-lh in globals.css, alongside
+   every other measured phone value. They need a third step below 292 — see the
+   note there — and stacking two Tailwind variants on one property leaves the
+   winner to whatever order Tailwind emits, which is how the first attempt at
+   this silently did nothing. */
 const LINE =
-  "font-display text-[128px] leading-[132.81px] font-bold tracking-[-0.03em] [font-stretch:87.5%] uppercase m-0 mob:text-[45px] mob:leading-[47.13px] mob:[font-stretch:112.5%]";
+  "font-display text-[length:var(--sw-fs)] leading-[var(--sw-lh)] font-bold tracking-[-0.03em] [font-stretch:87.5%] uppercase m-0 mob:[font-stretch:112.5%]";
 
 export function SmarterWay() {
   const [active, setActive] = useState(-1);
@@ -46,7 +52,11 @@ export function SmarterWay() {
   return (
     <section className="relative bg-white pt-[100px] mob:pt-0">
       <div className="sticky top-[100px] flex h-[calc(var(--screen-h)*0.8)] flex-col items-center justify-center mob:static mob:h-auto">
-        <div className="w-[961px] text-center mob:w-[341px]">
+        {/* The measured 341 is the column at a 390 viewport, where it leaves a
+            24px gutter. Below 365 that column is wider than the screen, so it
+            is capped to the viewport — min() keeps the measured value at every
+            width the design was drawn for and only bites under it. */}
+        <div className="w-[961px] text-center mob:w-[min(341px,calc(100vw-24px))]">
           <p className={LINE}>
             <ScatterText text="A smarter way to" idleColor="#000000" />
           </p>

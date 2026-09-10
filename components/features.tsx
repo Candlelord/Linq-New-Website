@@ -20,7 +20,9 @@ import type { CSSProperties, ReactNode } from "react";
    box keeps a real layout size for the column to space. */
 const EASE = "cubic-bezier(0.44,0,0.56,1)";
 const CARD =
-  "absolute h-[501px] w-[413px] rounded-[22px] mob:static mob:h-[301px] mob:w-[247.6px] mob:shrink-0 mob:rounded-[13px]";
+  /* Same viewport cap as the other measured phone widths: a no-op at 390 and
+     above, and the only thing keeping the card inside a 220dp window. */
+  "absolute h-[501px] w-[413px] rounded-[22px] mob:static mob:h-[301px] mob:w-[min(247.6px,calc(100vw-24px))] mob:shrink-0 mob:rounded-[13px]";
 
 /* Coins are a 107px gradient ring with a 99px solid disc inset 4px inside it. */
 type Coin = {
@@ -224,7 +226,7 @@ export function Features() {
   return (
     <section id="features" className="bg-white py-[92.8px] mob:py-[64px]">
       <div className="mx-auto flex w-[1280px] flex-col items-center gap-[64px] mob:w-full mob:gap-[32px]">
-        <div className="flex w-[783px] flex-col items-center gap-[4px] text-center mob:w-[274px] mob:gap-[1.4px]">
+        <div className="flex w-[783px] flex-col items-center gap-[4px] text-center mob:w-[min(274px,calc(100vw-24px))] mob:gap-[1.4px]">
           <h2 className="m-0 font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black mob:text-[22px] mob:leading-[25.9px] mob:tracking-[-0.66px]">
             Total control in your hands
           </h2>
@@ -237,7 +239,7 @@ export function Features() {
         {/* The column is 930 tall against 907 of cards — the live stage carries
             that slack at the bottom, and the 11.3px lead-in at the top is what
             puts the first card where it sits. */}
-        <div className="relative h-[534px] w-[1280px] mob:flex mob:h-[930px] mob:w-[248px] mob:flex-col mob:items-center mob:gap-[2px] mob:pt-[11.3px]">
+        <div className="relative h-[534px] w-[1280px] mob:flex mob:h-[930px] mob:w-[min(248px,calc(100vw-24px))] mob:flex-col mob:items-center mob:gap-[2px] mob:pt-[11.3px]">
           <FeatureCard
             tilt={[-3, -5]}
             style={{ left: 12, top: 10, background: "rgb(236,226,255)" }}

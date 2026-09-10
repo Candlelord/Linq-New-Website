@@ -108,6 +108,12 @@
   /* Feature cards — the phone card is the same 413×501 frame at 0.6 scale. */
   --feat-scale: 1;
 
+  /* "A smarter way to" headline. Here rather than on the component because it
+     needs a third step below 292, and two competing Tailwind variants on the
+     same property are resolved by whatever order Tailwind emits them in. */
+  --sw-fs: 128px;
+  --sw-lh: 132.81px;
+
   /* Testimonial rail. The phone slot is laid out independently rather than
      scaled: the card box and the two rail segments each have their own size,
      and only the card *interior* is a uniform 0.7556 of the desktop artwork. */
@@ -195,6 +201,9 @@
 
     --feat-scale: 0.6;
 
+    --sw-fs: 45px;
+    --sw-lh: 47.13px;
+
     --testi-slot: 356px;
     --testi-card-w: 303px;
     --testi-card-h: 398px;
@@ -217,8 +226,40 @@
   }
 }
 
+/* The feature card is a 413×501 frame scaled by --feat-scale and then rotated a
+   few degrees, so its footprint is roughly 447·scale — measured at 269px for the
+   0.6 phone scale. That clears a 390 viewport easily and stops fitting at about
+   292, where the column gets narrower than the card sweeps. At the 220dp floor
+   an Android freeform window gives, 0.6 pushes "Cashout as low as $0.1" past the
+   right edge and the label is cut in half.
+
+   0.42 is the largest scale that clears 220dp with margin: 447 × 0.42 = 188 in a
+   196px column. This block has to sit AFTER the 810 one — both set the same
+   property at equal specificity, so source order is what decides it. Nothing
+   between 292 and 810 changes. */
+@media (max-width: 292px) {
+  :root {
+    --feat-scale: 0.42;
+
+    /* "SMARTER" alone measures 219px at the 45px phone size, against the 196px
+       column a 220dp window leaves — and a single word has nowhere to wrap.
+       40px is that word scaled to fit (45 × 196/219), line-height by the same
+       ratio. */
+    --sw-fs: 40px;
+    --sw-lh: 41.9px;
+  }
+}
+
 html {
-  overflow-x: hidden;
+  /* `clip`, not `hidden`. Both hide the sideways overflow, but `hidden` makes
+     the element a scroll container — it is just "scrollable, programmatically
+     only" — and this page hangs three things off the document being the
+     scroller: the sticky footer reveal, the sticky panel in "a smarter way to",
+     and the fixed burger. `clip` hides the same pixels without creating that
+     container, so those keep working. The pair overflow-x: clip / overflow-y:
+     visible is legal and stays non-scrolling, where hidden/visible would be
+     coerced to auto. */
+  overflow-x: clip;
   /* Page still scrolls; the bar itself is hidden, matching the menu overlay. */
   scrollbar-width: none;
   -ms-overflow-style: none;
