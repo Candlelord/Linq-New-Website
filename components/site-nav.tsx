@@ -5,7 +5,12 @@ import { createPortal } from "react-dom";
 import { MenuCoins } from "@/components/menu-coins";
 
 /* Burger is fixed at 102×102, top 38 / right 80. Hover shrinks it to 96.9px and
-   tap crosses the bars, both over 1s on cubic-bezier(0.44,0,0.56,1). */
+   tap crosses the bars, both over 1s on cubic-bezier(0.44,0,0.56,1).
+
+   The phone burger is exactly half of that, measured off the live site: 51×51
+   at top 38 / right 25, bars 26.5×3, and a 1px inset highlight rather than 2px.
+   The sizes ride on custom properties because they are set inline and a `mob:`
+   class cannot outrank an inline style. */
 type Item = {
   label: string;
   /* An in-page anchor, or null when there is nothing to go to yet. */
@@ -25,13 +30,14 @@ const ITEMS: Item[] = [
 ];
 
 const EASE = "cubic-bezier(0.44,0,0.56,1)";
-const BAR = "absolute left-0 h-[6px] w-[53px] rounded-full bg-white";
+const BAR =
+  "absolute left-0 h-[6px] w-[53px] rounded-full bg-white mob:h-[3px] mob:w-[26.5px]";
 
 /* Measured off the live site: 102×102 at top 38 / right 80, a 1px rim over a
    100×100 radial fill with an inset white highlight; icon 53×32 at (24.5, 35). */
 function Burger({ open, onClick }: { open: boolean; onClick: () => void }) {
   const [hover, setHover] = useState(false);
-  const size = hover ? 96.9 : 102;
+  const size = hover ? "var(--burger-size-hover)" : "var(--burger-size)";
 
   return (
     <button
@@ -41,33 +47,38 @@ function Burger({ open, onClick }: { open: boolean; onClick: () => void }) {
       onMouseLeave={() => setHover(false)}
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
-      className="fixed top-[38px] right-[80px] z-[60] grid place-items-center rounded-full border border-transparent"
+      className="fixed top-[38px] right-[80px] z-[60] grid place-items-center rounded-full border border-transparent mob:right-[25px]"
       style={{
         width: size,
         height: size,
         transition: `width 1s ${EASE}, height 1s ${EASE}`,
         background:
           "radial-gradient(64% 75%, rgb(23,11,46) 0%, rgb(138,79,255) 100%) padding-box, linear-gradient(175deg, rgb(204,179,255) 43%, rgb(96,48,191) 112%) border-box",
-        boxShadow: "inset 0 2px 4px rgba(255,255,255,0.58)",
+        boxShadow:
+          "inset 0 var(--burger-inset) 4px rgba(255,255,255,0.58)",
       }}
     >
-      <span className="relative block h-[32px] w-[53px]">
+      <span className="relative block h-[32px] w-[53px] mob:h-[16px] mob:w-[26.5px]">
         <span
           className={BAR}
           style={{
-            top: open ? "13px" : 0,
+            top: open ? "var(--burger-bar-mid)" : 0,
             transform: open ? "rotate(45deg)" : "none",
             transition: `all 1s ${EASE}`,
           }}
         />
         <span
           className={BAR}
-          style={{ top: "13px", opacity: open ? 0 : 1, transition: `opacity 1s ${EASE}` }}
+          style={{
+            top: "var(--burger-bar-mid)",
+            opacity: open ? 0 : 1,
+            transition: `opacity 1s ${EASE}`,
+          }}
         />
         <span
           className={BAR}
           style={{
-            top: open ? "13px" : "26px",
+            top: open ? "var(--burger-bar-mid)" : "var(--burger-bar-bot)",
             transform: open ? "rotate(-45deg)" : "none",
             transition: `all 1s ${EASE}`,
           }}
@@ -89,10 +100,10 @@ const CLOSE_MS = 450;
    Live sets that gap at 34px, which reads cramped against an 88px cap-height
    label; widened here on request. The arrow's resting offset is derived from
    the gap so it stays tucked behind the label's tail whatever the gap is. */
-const ROW_H = 106;
-const INDENT = 30;
-const ARROW_GAP = 72;
-const ARROW_TUCK = ARROW_GAP + 46;
+const ROW_H = "var(--menu-row-h)";
+const INDENT = "var(--menu-indent)";
+const ARROW_GAP = "var(--menu-arrow-gap)";
+const ARROW_TUCK = "var(--menu-arrow-tuck)";
 const SPRING = "cubic-bezier(0.34,1.56,0.64,1)";
 
 function MenuRow({ item, onSelect }: { item: Item; onSelect: () => void }) {
@@ -111,16 +122,21 @@ function MenuRow({ item, onSelect }: { item: Item; onSelect: () => void }) {
       style={{ height: ROW_H }}
     >
       <span
-        className="flex items-center font-display text-[88px] leading-[1.2em] font-semibold tracking-[-0.03em] uppercase"
+        /* Never wrap: the row is a fixed height, and the hover arrow sits
+           inside this span (36px gap + 28px of arrow on a phone), which is
+           enough to push a long label onto a second line and overlap the row
+           below it. The arrow is transparent and tucked left at rest, so
+           letting it overhang the viewport costs nothing. */
+        className="flex items-center font-display text-[88px] leading-[1.2em] font-semibold tracking-[-0.03em] whitespace-nowrap uppercase mob:text-[40px]"
         style={{
-          transform: `translateX(${hover ? INDENT : 0}px)`,
+          transform: hover ? `translateX(${INDENT})` : "translateX(0px)",
           transition: `transform 0.4s ${SPRING}`,
         }}
       >
         {item.label}
 
         {item.badge && (
-          <span className="ml-[20px] rounded-full bg-[#8a4fff] px-[16px] py-[6px] font-body text-[16px] leading-[20px] font-medium tracking-[-0.48px] whitespace-nowrap text-white normal-case">
+          <span className="ml-[20px] rounded-full bg-[#8a4fff] px-[16px] py-[6px] font-body text-[16px] leading-[20px] font-medium tracking-[-0.48px] whitespace-nowrap text-white normal-case mob:ml-[10px] mob:px-[8px] mob:py-[3px] mob:text-[8px] mob:leading-[10px] mob:tracking-[-0.24px]">
             {item.badge}
           </span>
         )}
@@ -133,11 +149,13 @@ function MenuRow({ item, onSelect }: { item: Item; onSelect: () => void }) {
           width={56}
           height={49}
           aria-hidden
-          className="max-w-none shrink-0"
+          className="max-w-none shrink-0 mob:h-[24.5px] mob:w-[28px]"
           style={{
             marginLeft: ARROW_GAP,
             opacity: hover ? 1 : 0,
-            transform: `translateX(${hover ? 0 : -ARROW_TUCK}px)`,
+            transform: hover
+              ? "translateX(0px)"
+              : `translateX(calc(${ARROW_TUCK} * -1))`,
             transition: `opacity 0.3s ease-out, transform 0.4s ${SPRING}`,
           }}
         />
@@ -205,7 +223,10 @@ export function SiteNav() {
     >
       <MenuCoins />
 
-      <nav className="absolute top-[38px] left-[80px] z-[1] flex flex-col items-start">
+      {/* No phone variant exists for this menu — the live site keeps the
+          desktop rows here and clips them. These are laid out at the same 0.5
+          the burger uses, which is an extrapolation, not a measurement. */}
+      <nav className="absolute top-[38px] left-[80px] z-[1] flex flex-col items-start mob:left-[25px]">
         {ITEMS.map((item) => (
           <MenuRow
             key={item.label}

@@ -509,8 +509,62 @@ because these are decisions that are genuinely theirs, not yours:
   testimonials and no portraits — initials stood in, because reusing one stock
   photo across four different people would read as fabricated);
 - places the live site looks wrong and you copied it faithfully;
-- scope you knowingly did not cover (here: mobile is a `zoom` ladder that scales
-  the 1440 layout, not a responsive reflow — nothing reflows, and the user knows
-  that).
+- scope you knowingly did not cover.
+
+---
+
+## 10. The phone variant
+
+Mobile is no longer a `zoom` ladder. It is a real reflow at `max-width: 810px`,
+measured off the same live site at a 390×844 viewport.
+
+**What the breakpoint sweep found.** The designer's Framer file carries exactly
+one media query — `(max-width: 1439.98px)` — so there is no tablet variant and
+everything below 1440 gets the phone layout. Following that literally hands a
+1366 laptop the phone layout stretched full width, which on the live site
+renders as white-on-white with the headline invisible. So the phone layout is
+scoped to ≤810 here and the zoom ladder (0.67, then 0.53 below 965) covers the
+band above it. That is a deliberate divergence, not an oversight.
+
+**Where the numbers live.** Most phone values are custom properties in
+`globals.css` rather than `mob:` classes, because the components carry them in
+inline `style` objects and an inline style outranks a media query. The rule of
+thumb: if the value is in a `className`, use `mob:`; if it is in `style`, it
+needs a variable. `help.tsx` takes this furthest — each bubble emits both
+coordinate sets as `--d-*` / `--m-*` and the stylesheet picks.
+
+**Three sections the designer never adapted.** The CTA, the footer and the menu
+overlay keep their desktop composition below 1440 on the live site and clip it
+("…to Move Your M…", "…ommunities to…", "LINQ BU…"). Those three are rebuilt
+here as extrapolations from the ratios the designer *did* use — heading 64 → 25,
+subtitle 32 → 12, buttons 220×54 → 172×42, panel frame 0.2906 — and every one of
+them says so in a comment. Do not treat their numbers as measurements.
+
+**Phone-specific traps that cost time here.**
+
+- **The word-cycler is not a cycler on the phone.** It is a static stack with all
+  four action words visible. The scroll targets are `display:none` and the
+  per-word opacity/translate ride on custom properties so the media query can
+  beat the inline style.
+- **`white-space: pre` plus NBSP makes wrapping impossible.** `ScatterText` used
+  both, so the phone headline could not break where live breaks it. Fixed by
+  grouping characters into `nowrap` word spans with a real space between them —
+  because every character being its own `inline-block` otherwise lets the browser
+  break *between any two glyphs* ("A SMARTER W / AY TO").
+- **The phone headline is expanded, not condensed**, despite Framer naming the
+  face "Mozilla Headline SemiCondensed". Measured against live word widths at
+  45px, the width axis is 112.5%, against desktop's 87.5%.
+- **Measure the rendered extent, not a clone.** Cloning a `ScatterText` node to
+  measure it silently loses the loaded face and returns fallback metrics. A
+  `Range` over the live node, or the element's own box height in line-heights,
+  is the trustworthy signal.
+- **Centre the slot, not the card.** In the testimonial rail the phone slot is
+  356×398 inside a 532-tall row; every rail offset is measured from the *slot*
+  top. Centring the card inside the row instead drops the rail 67px clear of the
+  ring it is supposed to thread through — and it still looks plausible until you
+  compare the ring.
+- **Feature-card size deltas are usually animation phase.** A card sampled at 5°
+  of its wobble measures ~9px wider than the same card at 3°. Solve the rotation
+  out of the bounding box before concluding anything is wrong.
 
 Never let one of these quietly become a decision you made on their behalf.

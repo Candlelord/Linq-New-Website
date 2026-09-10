@@ -4,22 +4,47 @@ import { useEffect, useRef, useState } from "react";
 
 /* A single 275px box spring-following the cursor, swapping image by horizontal
    zone. All three images stay mounted so switching never refetches or flashes —
-   the reveal is a clip-path transition rather than a remount. */
+   the reveal is a clip-path transition rather than a remount.
+
+   Desktop only. `pointermove` fires for touch as well as a mouse, and
+   `pointerleave` does not fire on a phone — so a single scroll-drag switched
+   the trail on and left a 275px coin parked over the hero for good. Live has
+   the same element on mobile but never activates it (it sits at rest: 41×41,
+   which is this 275 at the 0.15 idle scale), so removing it here matches what
+   the live site actually shows.
+
+   Gating on a media query rather than a touch test, because the breakpoint is
+   what decides whether this is a pointer layout at all — and it re-evaluates on
+   rotation, which a one-shot capability check would not. */
 const IMAGES = ["/images/usdc.png", "/images/naira.png", "/images/usdt.png"];
 const SIZE = 275;
+const PHONE = "(max-width: 810px)";
 
 export function MouseTrail() {
   const boxRef = useRef<HTMLDivElement>(null);
   const [zone, setZone] = useState(0);
   const [active, setActive] = useState(false);
+  /* Starts false so the first client render matches the server's. On a phone
+     the effect then unmounts it — invisible either way, since it rests at
+     opacity 0. */
+  const [phone, setPhone] = useState(false);
 
   const target = useRef({ x: 0, y: 0 });
   const pos = useRef({ x: 0, y: 0 });
   const vel = useRef({ x: 0, y: 0 });
 
+  useEffect(() => {
+    const mq = window.matchMedia(PHONE);
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   /* Listen on the parent section so this layer can sit above the headline
      without swallowing clicks on the buttons beneath it. */
   useEffect(() => {
+    if (phone) return;
     const host = boxRef.current?.parentElement;
     if (!host) return;
 
@@ -52,9 +77,10 @@ export function MouseTrail() {
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerleave", onLeave);
     };
-  }, []);
+  }, [phone]);
 
   useEffect(() => {
+    if (phone) return;
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
@@ -73,7 +99,10 @@ export function MouseTrail() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [phone]);
+
+  /* After every hook, so the hook order never changes between renders. */
+  if (phone) return null;
 
   return (
     <div

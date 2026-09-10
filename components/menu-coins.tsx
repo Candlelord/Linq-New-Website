@@ -71,7 +71,9 @@ export function MenuCoins() {
           stage of exactly that size centred in the overlay. Placing them
           directly on a full-viewport parent drifts them badly once the
           viewport is not 1440 wide. */}
-      <div className="absolute top-1/2 left-1/2 h-[900px] w-[1440px] -translate-x-1/2 -translate-y-1/2">
+      {/* Halved on the phone, matching the menu rows, so the whole coin
+          composition still lands on a 390 viewport rather than being clipped. */}
+      <div className="absolute top-1/2 left-1/2 h-[900px] w-[1440px] -translate-x-1/2 -translate-y-1/2 mob:scale-50">
         {COINS.map((c) => (
           <div
             key={c.key}

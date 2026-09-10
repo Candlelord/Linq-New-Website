@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 /* Port of the designer's Framer ScatterTextButton.
 
@@ -46,31 +46,65 @@ export function ScatterText({
     [chars, scatterDistance],
   );
 
+  /* Characters are grouped into words, and only the gaps between words are
+     breakable. Every character being its own inline-block means the browser
+     will otherwise happily break between any two of them — which is how the
+     phone headline first came out as "A SMARTER W / AY TO".
+
+     The character index keeps running across the spaces even though they are
+     no longer rendered as spans, so each glyph keeps the same seeded offset it
+     had when the whole string was one flat list. */
+  const words = useMemo(() => {
+    const out: { start: number; chars: string[] }[] = [];
+    let current: { start: number; chars: string[] } | null = null;
+    chars.forEach((ch, i) => {
+      if (ch === " ") {
+        current = null;
+        return;
+      }
+      if (!current) {
+        current = { start: i, chars: [] };
+        out.push(current);
+      }
+      current.chars.push(ch);
+    });
+    return out;
+  }, [chars]);
+
   return (
     <span
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       className={className}
-      style={{ display: "inline-block", cursor: "pointer", whiteSpace: "pre" }}
+      style={{ display: "inline-block", cursor: "pointer" }}
     >
-      {chars.map((ch, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-block",
-            willChange: "transform",
-            color: hovered ? hoverColor : idleColor,
-            transform: hovered
-              ? `translate(${scatter[i].x}px, ${scatter[i].y}px) rotate(${scatter[i].r}deg)`
-              : "none",
-            transition: `transform 0.45s ${SPRING}, color 0.3s ease-out`,
-          }}
-        >
-          {/* Each character is its own inline-block, so a plain space between them
-              collapses — a non-breaking space keeps the word gaps, same as the
-              Framer original. */}
-          {ch === " " ? " " : ch}
-        </span>
+      {words.map((word, w) => (
+        <Fragment key={word.start}>
+          {/* Atomic: the word never breaks internally. The space that follows
+              sits outside it, so that is the only break opportunity. */}
+          <span style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+            {word.chars.map((ch, j) => {
+              const i = word.start + j;
+              return (
+                <span
+                  key={i}
+                  style={{
+                    display: "inline-block",
+                    willChange: "transform",
+                    color: hovered ? hoverColor : idleColor,
+                    transform: hovered
+                      ? `translate(${scatter[i].x}px, ${scatter[i].y}px) rotate(${scatter[i].r}deg)`
+                      : "none",
+                    transition: `transform 0.45s ${SPRING}, color 0.3s ease-out`,
+                  }}
+                >
+                  {ch}
+                </span>
+              );
+            })}
+          </span>
+          {w < words.length - 1 ? " " : null}
+        </Fragment>
       ))}
     </span>
   );

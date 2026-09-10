@@ -10,9 +10,17 @@ import type { CSSProperties, ReactNode } from "react";
    the rotation is about the centre, that translate is just a horizontal shift,
    so it is folded into `left` here and the transform stays a pure rotation.
    That matters: the wobble animates `transform`, and mixing the offset in
-   would make every keyframe carry it too. */
+   would make every keyframe carry it too.
+
+   The phone variant is the same three cards at a uniform 0.6 scale (413×501 →
+   247.6×301, radius 22 → 13, label 36 → 21.6), stacked in a column 2px apart
+   instead of laid out across a stage, and each keeps the first of its two tilt
+   angles as its resting pose. The scale rides on an inner wrapper rather than
+   the card itself, so the wobble keyframes stay a pure rotation and the card
+   box keeps a real layout size for the column to space. */
 const EASE = "cubic-bezier(0.44,0,0.56,1)";
-const CARD = "absolute h-[501px] w-[413px] rounded-[22px]";
+const CARD =
+  "absolute h-[501px] w-[413px] rounded-[22px] mob:static mob:h-[301px] mob:w-[247.6px] mob:shrink-0 mob:rounded-[13px]";
 
 /* Coins are a 107px gradient ring with a 99px solid disc inset 4px inside it. */
 type Coin = {
@@ -164,7 +172,14 @@ function FeatureCard({
           "translate 0.45s cubic-bezier(0.22,1,0.36,1), scale 0.45s cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      {children}
+      {/* Desktop scale is 1, so this wrapper is a no-op there beyond being the
+          containing block the children were already measured against. */}
+      <div
+        className="relative h-[501px] w-[413px] origin-top-left"
+        style={{ transform: "scale(var(--feat-scale))" }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -174,19 +189,22 @@ const LABEL =
 
 export function Features() {
   return (
-    <section id="features" className="bg-white py-[92.8px]">
-      <div className="mx-auto flex w-[1280px] flex-col items-center gap-[64px]">
-        <div className="flex w-[783px] flex-col items-center gap-[4px] text-center">
-          <h2 className="m-0 font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black">
+    <section id="features" className="bg-white py-[92.8px] mob:py-[64px]">
+      <div className="mx-auto flex w-[1280px] flex-col items-center gap-[64px] mob:w-full mob:gap-[32px]">
+        <div className="flex w-[783px] flex-col items-center gap-[4px] text-center mob:w-[274px] mob:gap-[1.4px]">
+          <h2 className="m-0 font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black mob:text-[22px] mob:leading-[25.9px] mob:tracking-[-0.66px]">
             Total control in your hands
           </h2>
-          <p className="m-0 text-[32px] leading-[38.4px] tracking-[-1.92px] text-black">
+          <p className="m-0 text-[32px] leading-[38.4px] tracking-[-1.92px] text-black mob:text-[11px] mob:leading-[13.2px] mob:tracking-[-0.66px]">
             No limits. No delays. Just utility
           </p>
         </div>
 
         {/* Card 3 deliberately overhangs the stage on the right, so no clipping. */}
-        <div className="relative h-[534px] w-[1280px]">
+        {/* The column is 930 tall against 907 of cards — the live stage carries
+            that slack at the bottom, and the 11.3px lead-in at the top is what
+            puts the first card where it sits. */}
+        <div className="relative h-[534px] w-[1280px] mob:flex mob:h-[930px] mob:w-[248px] mob:flex-col mob:items-center mob:gap-[2px] mob:pt-[11.3px]">
           <FeatureCard
             tilt={[-3, -5]}
             style={{ left: 12, top: 10, background: "rgb(236,226,255)" }}

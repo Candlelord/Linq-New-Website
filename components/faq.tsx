@@ -6,14 +6,22 @@ import { useState } from "react";
    intervals inside a 1610px-tall well, so only each heading strip shows; the
    last panel is the only one whose body is visible at rest.
 
+   The phone panel is a uniform 0.2906 of that (372×268, radius 11.62) but the
+   step is not: 79.53 rather than the 50 a proportional scale would give,
+   because the question type is bumped from a scaled 11.6px up to 16px and needs
+   a taller strip to sit in. The reveal shortens to 130px. Those live in
+   globals.css as custom properties, since they are carried in inline styles
+   that a `mob:` class cannot reach.
+
    Hovering a panel pushes every panel *below* it down by 202px, which uncovers
    that panel's body (74 + 44 + 48 + 114 = 280px of content needs 374px of room).
    The live site cuts to that position with no transition at all; this eases it
    instead. The offset rides on `transform` rather than `top` so the browser can
-   composite it — animating `top` would relayout five 1280px panels per frame. */
-const STEP = 172;
-const REVEAL = 202;
-const PANEL_H = 922;
+   composite it — animating `top` would relayout five 1280px panels per frame.
+
+   There is no hover on a phone, so the live site opens a panel on tap and
+   leaves it open; the phone reveal is 130px rather than 202. Reproduced here,
+   with the pointer path left exactly as it was. */
 const SLIDE = "transform 0.5s cubic-bezier(0.22,1,0.36,1)";
 
 const ITEMS = [
@@ -25,6 +33,9 @@ const ITEMS = [
   },
   {
     q: "How fast will the money hit my bank account?",
+    /* The only question long enough to wrap on a phone, and live gives it its
+       own line-height because of it. */
+    wraps: true,
     a: "Instantly. Linq completely bypasses the unpredictable wait times of traditional P2P trading. Once you initiate a withdrawal, your fiat is settled in your local bank account in seconds.",
     bg: "#bc97ff",
     fg: "#000000",
@@ -51,7 +62,6 @@ const ITEMS = [
 
 /* The well keeps its resting height on hover, so the pushed-down panels run off
    the bottom and the section clips them — same as the live site. */
-const WELL_H = (ITEMS.length - 1) * STEP + PANEL_H;
 
 export function Faq() {
   const [open, setOpen] = useState<number | null>(null);
@@ -59,48 +69,76 @@ export function Faq() {
   return (
     <section
       id="faqs"
-      className="flex w-full flex-col items-center justify-center gap-[64px] overflow-clip bg-white px-[128px] py-[64px]"
+      className="flex w-full flex-col items-center justify-center gap-[64px] overflow-clip bg-white px-[128px] py-[64px] mob:px-0"
     >
-      <div className="flex w-[784px] flex-col items-center gap-[4px]">
-        <h2 className="m-0 w-full text-center font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black">
+      <div className="flex w-[784px] flex-col items-center gap-[4px] mob:w-[372px] mob:gap-[1.55px]">
+        <h2 className="m-0 w-full text-center font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black mob:text-[25px] mob:leading-[28.69px] mob:tracking-[-0.75px]">
           Frequently asked questions
         </h2>
-        <p className="m-0 w-full text-center text-[32px] leading-[38.4px] tracking-[-1.92px] text-black">
+        <p className="m-0 w-full text-center text-[32px] leading-[38.4px] tracking-[-1.92px] text-black mob:text-[12px] mob:leading-[14.4px] mob:tracking-[-0.72px]">
           Everything you need to know about using Linq.
         </p>
       </div>
 
       <div
-        className="relative w-[1280px]"
-        style={{ height: WELL_H }}
+        className="relative w-[var(--faq-well-w)]"
+        style={{ height: "var(--faq-well-h)" }}
         onMouseLeave={() => setOpen(null)}
       >
         {ITEMS.map((item, i) => (
           <div
             key={item.q}
             onMouseEnter={() => setOpen(i)}
-            className="absolute left-0 w-[1280px]"
+            onClick={() => setOpen(i)}
+            className="absolute left-0 w-[var(--faq-well-w)]"
             style={{
-              top: i * STEP,
-              transform: `translateY(${open !== null && i > open ? REVEAL : 0}px)`,
+              top: `calc(var(--faq-step) * ${i})`,
+              transform:
+                open !== null && i > open
+                  ? "translateY(var(--faq-reveal))"
+                  : "translateY(0px)",
               transition: SLIDE,
-              height: PANEL_H,
+              height: "var(--faq-panel-h)",
               background: item.bg,
               /* Only the last panel rounds its bottom — the others are covered. */
               borderRadius:
-                i === ITEMS.length - 1 ? "40px" : "40px 40px 0px 0px",
+                i === ITEMS.length - 1
+                  ? "var(--faq-radius)"
+                  : "var(--faq-radius) var(--faq-radius) 0px 0px",
             }}
           >
-            <div className="absolute top-[74px] left-[94px] flex w-[1092px] flex-col items-start gap-[48px]">
+            {/* Centred in the panel rather than pinned to a left inset: the
+                live file drifts ±4px per panel around a centred group, which is
+                Framer noise rather than a design. */}
+            <div
+              className="absolute left-1/2 flex -translate-x-1/2 flex-col items-start"
+              style={{
+                top: "var(--faq-body-y)",
+                width: "var(--faq-body-w)",
+                gap: "var(--faq-body-gap)",
+              }}
+            >
               <h3
-                className="m-0 font-display text-[40px] leading-[44px] font-normal tracking-[-1.6px]"
-                style={{ color: item.fg }}
+                className="m-0 font-display font-normal"
+                style={{
+                  color: item.fg,
+                  fontSize: "var(--faq-q-fs)",
+                  lineHeight: item.wraps
+                    ? "var(--faq-q-lh-wrap)"
+                    : "var(--faq-q-lh)",
+                  letterSpacing: "var(--faq-q-ls)",
+                }}
               >
                 {item.q}
               </h3>
               <p
-                className="m-0 text-[32px] leading-[38px] font-light tracking-[-1.92px]"
-                style={{ color: item.fg }}
+                className="m-0 font-light"
+                style={{
+                  color: item.fg,
+                  fontSize: "var(--faq-a-fs)",
+                  lineHeight: "var(--faq-a-lh)",
+                  letterSpacing: "var(--faq-a-ls)",
+                }}
               >
                 {item.a}
               </p>

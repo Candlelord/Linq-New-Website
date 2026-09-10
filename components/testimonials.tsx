@@ -6,6 +6,15 @@ import { useRef } from "react";
    on a 833ms mirrored tween; the whole row tickers left at 100px/s and eases
    down to 30px/s while the pointer is over it.
 
+   The phone slot is laid out independently rather than scaled down: the card
+   box is 303×398 in a 356 slot, the two rail segments take different widths
+   (204 in front, 129 behind), and only the card *interior* is a uniform 0.7556
+   of the desktop artwork. Those all arrive as custom properties from
+   globals.css. The row stays 532 tall at both breakpoints and the shorter phone
+   slot is centred in it — the slot, not the card: every rail offset is measured
+   from the slot top, so centring the card instead drops the rail 67px clear of
+   the ring it is supposed to thread through.
+
    The rail is not one continuous bar. Each slot carries two 298px segments:
    one *behind* the card starting at x=231, and one *in front* starting at x=0
    that runs across the card's left half and stops with a rounded cap just past
@@ -13,10 +22,13 @@ import { useRef } from "react";
    gap between the front segment's cap and the ring's inner edge — so the rail
    reads as passing through the hole. Drawing a single bar in front (or a single
    bar behind) both get this visibly wrong. */
-const SLOT = 493;
-const CARD_W = 401;
-const CARD_H = 532;
-const RAIL_Y = 47;
+const SLOT = "var(--testi-slot)";
+const CARD_W = "var(--testi-card-w)";
+const CARD_H = "var(--testi-card-h)";
+const RAIL_Y = "var(--testi-rail-top)";
+/* The row keeps the desktop card height at both breakpoints; the phone card is
+   centred inside it, which is where the live 67px top offset comes from. */
+const ROW_H = 532;
 const SPEED = 100; // px per second
 const HOVER_RATE = 0.3; // 30px/s while hovered
 const SWING = "card-swing 0.4165s cubic-bezier(0.44,0,0.56,1) infinite alternate";
@@ -53,9 +65,12 @@ const REVIEWS = [
    displays — the marquee then translates by exactly one track's width. */
 const REPEATS = 3;
 const SLOTS = REVIEWS.length * REPEATS;
-const DURATION = (SLOTS * SLOT) / SPEED;
+/* At a constant 100px/s the loop takes one track-width over the speed. calc()
+   cannot turn a length into a time, so globals.css carries the seconds one slot
+   takes at each breakpoint and the slot count stays here. */
+const DURATION = `calc(var(--testi-slot-dur) * ${SLOTS})`;
 
-function RailSegment({ left }: { left: number }) {
+function RailSegment({ left, width }: { left: string; width: string }) {
   return (
     <img
       src="/images/testimonials/rail.svg"
@@ -63,7 +78,7 @@ function RailSegment({ left }: { left: number }) {
       width={298}
       height={10}
       className="absolute max-w-none"
-      style={{ left, top: RAIL_Y }}
+      style={{ left, top: RAIL_Y, width, height: "var(--testi-rail-h)" }}
     />
   );
 }
@@ -74,14 +89,20 @@ function Card({ review }: { review: Review }) {
   return (
     <div className="relative shrink-0" style={{ width: SLOT, height: CARD_H }}>
       {/* Behind the card: carries the rail on into the next slot. */}
-      <RailSegment left={231} />
+      <RailSegment
+        left="var(--testi-rail-back-left)"
+        width="var(--testi-rail-back-w)"
+      />
 
       <div
-        className="absolute top-0 overflow-hidden rounded-[31px]"
+        className="absolute overflow-hidden"
         style={{
-          left: SLOT - CARD_W, // 92px lead-in, so the gap sits before each card
+          // The lead-in gap sits before each card, so the card is flush right.
+          left: `calc(${SLOT} - ${CARD_W})`,
+          top: 0,
           width: CARD_W,
           height: CARD_H,
+          borderRadius: "var(--testi-card-r)",
           animation: SWING,
         }}
       >
@@ -92,11 +113,26 @@ function Card({ review }: { review: Review }) {
           width={59}
           height={10}
           className="absolute max-w-none"
-          style={{ left: 190, top: RAIL_Y }}
+          style={{
+            left: "var(--testi-link-x)",
+            top: "var(--testi-link-y)",
+            width: "var(--testi-link-w)",
+            height: "var(--testi-link-h)",
+          }}
         />
 
         {/* Art carries the punched hole the rail shows through, plus the ring. */}
-        <div className="absolute top-[7px] left-[6px] h-[518px] w-[390px] overflow-hidden">
+        {/* The whole card interior is one uniform 0.7556 scale on the phone —
+            the artwork, the quote and the avatar row all measure to that same
+            ratio, so scaling the group beats re-specifying every child. */}
+        <div
+          className="absolute h-[518px] w-[390px] origin-top-left overflow-hidden"
+          style={{
+            top: "var(--testi-art-y)",
+            left: "var(--testi-art-x)",
+            transform: "scale(var(--testi-scale))",
+          }}
+        >
           <img
             src="/images/testimonials/card.svg"
             alt=""
@@ -131,12 +167,18 @@ function Card({ review }: { review: Review }) {
         {/* Framer paints the card's rim on a ::after overlay, so it sits on top
             of the art and does not shift it — and the ring's punched hole stays
             transparent. Reproduced as an overlay for the same reason. */}
-        <div className="pointer-events-none absolute inset-0 rounded-[31px] border-[8px] border-[#e8ddff]" />
+        <div
+          className="pointer-events-none absolute inset-0 border-[#e8ddff]"
+          style={{
+            borderRadius: "var(--testi-card-r)",
+            borderWidth: "calc(8px * var(--testi-scale))",
+          }}
+        />
       </div>
 
       {/* In front of the card: runs across its left half and caps just past the
           ring. Last in the slot so it paints over the card and its rim. */}
-      <RailSegment left={0} />
+      <RailSegment left="0px" width="var(--testi-rail-front-w)" />
     </div>
   );
 }
@@ -163,20 +205,20 @@ export function Testimonials() {
 
   return (
     <section className="flex w-full flex-col items-center justify-center gap-[64px] overflow-clip bg-white py-[84px]">
-      <h2 className="m-0 font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black">
+      <h2 className="m-0 font-display text-[64px] leading-[74px] font-medium tracking-[-1.92px] text-black mob:text-[25px] mob:tracking-[-0.75px]">
         Word from our users
       </h2>
 
       <div
         className="relative w-full"
-        style={{ height: CARD_H }}
+        style={{ height: ROW_H }}
         onMouseEnter={() => setRate(HOVER_RATE)}
         onMouseLeave={() => setRate(1)}
       >
         <div
           ref={rowRef}
-          className="flex w-max motion-safe:animate-[marquee_var(--dur)_linear_infinite]"
-          style={{ ["--dur" as string]: `${DURATION}s` }}
+          className="flex h-full w-max items-center motion-safe:animate-[marquee_var(--dur)_linear_infinite]"
+          style={{ ["--dur" as string]: DURATION }}
         >
           <Track />
           <Track />

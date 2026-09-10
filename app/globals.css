@@ -11,11 +11,24 @@
   --font-body: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* The layout is authored at a fixed 1440px. 0.67 is the zoom the site is tuned
-   to look right at on desktop, and it fits any viewport down to ~965px. Below
-   that the ladder keeps stepping down so the whole 1440 layout still fits
-   rather than overflowing — a stopgap for small screens, not a responsive
-   design: nothing reflows, it only scales. */
+/* ─────────────────────────────────────────────────────────────────────────
+   Breakpoint
+
+   The designer's Framer file carries exactly one media query —
+   `(max-width: 1439.98px)` — so there is no tablet variant: everything below
+   1440 gets the phone layout. Followed literally that hands a 1366 laptop the
+   phone layout stretched to full width, which on the live site renders as
+   white-on-white with the headline invisible and the buttons adrift.
+
+   So the phone layout is scoped to <=810px here, and the zoom ladder keeps the
+   1440 desktop layout above it. `mob:` is the variant every component uses to
+   override a desktop value. */
+@custom-variant mob (@media (max-width: 810px));
+
+/* The desktop layout is authored at a fixed 1440px. 0.67 is the zoom it is
+   tuned to look right at, and it fits any viewport down to 965px; 0.53 carries
+   it to 811. At 810 and below the phone layout takes over and the zoom is
+   dropped — mobile is a real reflow, not a scale. */
 :root {
   --zoom: 0.67;
   /* Viewport units ignore `zoom`, so anything sized to the screen has to divide
@@ -23,34 +36,178 @@
   --screen-h: calc(100vh / var(--zoom));
 }
 
-@media (max-width: 960px) {
+@media (max-width: 965px) {
   :root {
     --zoom: 0.53;
   }
 }
-@media (max-width: 760px) {
-  :root {
-    --zoom: 0.44;
-  }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Phone layout
+
+   Every value below was measured off https://linqnew.framer.website at a
+   390×844 viewport. They live here as custom properties rather than in the
+   components because the components carry them in inline `style` objects,
+   which a `mob:` class cannot override.
+
+   Desktop values are the defaults on :root, so the cascade reads in one
+   direction: desktop is the base and mobile overrides it. */
+:root {
+  /* Burger — the phone one is exactly half the desktop button, measured:
+     51×51 at top 38 / right 25, bars 26.5×3, inset highlight 1px not 2px. */
+  --burger-size: 102px;
+  --burger-size-hover: 96.9px;
+  --burger-bar-mid: 13px;
+  --burger-bar-bot: 26px;
+  --burger-inset: 2px;
+
+  /* Menu overlay. The designer shipped no phone variant for this — live keeps
+     the desktop 88px rows at x=80 and clips them mid-word ("LINQ BU…"), so
+     these are an extrapolation, not measurements. The phone scale is 0.4545
+     (88 → 40px, 106 → 48px), set by the longest row: "LINQ BUSINESS" plus its
+     "Coming soon" badge has to clear 390 from a 25px inset, which it does with
+     18px to spare. Anything larger clips the badge. */
+  --menu-row-h: 106px;
+  --menu-indent: 30px;
+  --menu-arrow-gap: 72px;
+  --menu-arrow-tuck: 118px;
+
+  /* Chains ticker — the phone pill is a uniform 0.47 of the desktop one. */
+  --chain-pill-w: 322px;
+  --chain-pill-h: 93px;
+  --chain-pill-r: 30px;
+  --chain-pill-px: 20px;
+  --chain-pill-py: 12.6px;
+  --chain-gap: 28px;
+  --chain-inner-gap: 15px;
+  --chain-icon: 67.43px;
+  --chain-fs: 32px;
+  --chain-lh: 38px;
+  --chain-ls: -1.92px;
+  /* Seconds one pill-plus-gap takes at 100px/s: (322 + 28) / 100. */
+  --chain-pill-dur: 3.5s;
+
+  /* FAQ stack */
+  --faq-well-w: 1280px;
+  --faq-well-h: 1610px;
+  --faq-panel-h: 922px;
+  --faq-step: 172px;
+  --faq-reveal: 202px;
+  --faq-radius: 40px;
+  --faq-body-w: 1092px;
+  --faq-body-y: 74px;
+  --faq-body-gap: 48px;
+  --faq-q-fs: 40px;
+  --faq-q-lh: 44px;
+  --faq-q-ls: -1.6px;
+  --faq-q-lh-wrap: 44px;
+  --faq-a-fs: 32px;
+  --faq-a-lh: 38px;
+  --faq-a-ls: -1.92px;
+
+  /* Feature cards — the phone card is the same 413×501 frame at 0.6 scale. */
+  --feat-scale: 1;
+
+  /* Testimonial rail. The phone slot is laid out independently rather than
+     scaled: the card box and the two rail segments each have their own size,
+     and only the card *interior* is a uniform 0.7556 of the desktop artwork. */
+  --testi-slot: 493px;
+  --testi-card-w: 401px;
+  --testi-card-h: 532px;
+  --testi-card-r: 31px;
+  --testi-rail-top: 47px;
+  --testi-rail-h: 10px;
+  --testi-rail-back-left: 231px;
+  --testi-rail-back-w: 298px;
+  --testi-rail-front-w: 298px;
+  --testi-art-x: 6px;
+  --testi-art-y: 7px;
+  /* The short link that fills the ring hole, so the rail reads as passing
+     through it. Measured at both breakpoints rather than derived from the card
+     scale — the phone hole does not sit exactly where scaling would put it. */
+  --testi-link-x: 190px;
+  --testi-link-y: 47px;
+  --testi-link-w: 59px;
+  --testi-link-h: 10px;
+  --testi-scale: 1;
+  /* Seconds one slot takes at 100px/s: 493 / 100. */
+  --testi-slot-dur: 4.93s;
 }
-@media (max-width: 630px) {
+
+@media (max-width: 810px) {
   :root {
-    --zoom: 0.36;
-  }
-}
-@media (max-width: 515px) {
-  :root {
-    --zoom: 0.3;
-  }
-}
-@media (max-width: 430px) {
-  :root {
-    --zoom: 0.25;
-  }
-}
-@media (max-width: 358px) {
-  :root {
-    --zoom: 0.21;
+    --zoom: 1;
+
+    --burger-size: 51px;
+    --burger-size-hover: 48.45px;
+    --burger-bar-mid: 6.5px;
+    --burger-bar-bot: 13px;
+    --burger-inset: 1px;
+
+    --menu-row-h: 48px;
+    --menu-indent: 15px;
+    --menu-arrow-gap: 36px;
+    --menu-arrow-tuck: 59px;
+
+    --chain-pill-w: 151px;
+    --chain-pill-h: 44px;
+    --chain-pill-r: 14px;
+    --chain-pill-px: 9.4px;
+    --chain-pill-py: 5.93px;
+    --chain-gap: 13px;
+    --chain-inner-gap: 7.05px;
+    --chain-icon: 32px;
+    --chain-fs: 15px;
+    --chain-lh: 17.875px;
+    --chain-ls: -0.9px;
+    --chain-pill-dur: 1.64s;
+
+    /* The panel is a uniform 0.2906 of the desktop panel (372/1280), but the
+       step is not — it is 79.53 rather than the 50 that scale would give,
+       because the phone question type is bumped to 16px for legibility and
+       needs a taller strip to sit in. */
+    --faq-well-w: 372px;
+    --faq-well-h: 640.5px;
+    --faq-panel-h: 268px;
+    --faq-step: 79.53px;
+    --faq-reveal: 130px;
+    --faq-radius: 11.62px;
+    --faq-body-w: 317px;
+    --faq-body-y: 32px;
+    --faq-body-gap: 32px;
+    --faq-q-fs: 16px;
+    /* 12.79 at a 16px size — tighter than the font, which is a Framer habit
+       (the help heading does the same). That is the value on four of the five
+       live panels. The one question long enough to wrap gets 19.66 instead,
+       which it needs: two lines at 12.79 would overlap. */
+    --faq-q-lh: 12.79px;
+    --faq-q-ls: -0.32px;
+    --faq-q-lh-wrap: 19.66px;
+    --faq-a-fs: 14px;
+    --faq-a-lh: 19px;
+    --faq-a-ls: -0.42px;
+
+    --feat-scale: 0.6;
+
+    --testi-slot: 356px;
+    --testi-card-w: 303px;
+    --testi-card-h: 398px;
+    --testi-card-r: 23.25px;
+    --testi-rail-top: 33px;
+    --testi-rail-h: 9px;
+    --testi-rail-back-left: 253px;
+    --testi-rail-back-w: 129px;
+    --testi-rail-front-w: 204px;
+    --testi-art-x: 4.53px;
+    --testi-art-y: 5.29px;
+    --testi-link-x: 139.3px;
+    --testi-link-y: 32.5px;
+    --testi-link-w: 44.1px;
+    --testi-link-h: 9.7px;
+    /* 303/401. The interior is 532 × 0.7556 = 402 tall in a 398 box, so 4px of
+       the card foot is clipped — solid colour, so nothing shows. */
+    --testi-scale: 0.7556;
+    --testi-slot-dur: 3.56s;
   }
 }
 
@@ -70,6 +227,95 @@ body {
   zoom: var(--zoom);
   background: #000000;
   font-family: var(--font-body);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Help section
+
+   Every bubble carries both coordinate sets as --d-* (desktop) and --m-*
+   (phone) custom properties; these rules choose which set is live. The choice
+   has to happen in the stylesheet rather than inline, because an inline
+   `left` would outrank the media query below it. */
+.help-stage {
+  top: 112px;
+  width: 1280px;
+  height: 677px;
+}
+
+.help-bubble {
+  left: var(--d-bx);
+  top: var(--d-by);
+  width: var(--d-bw);
+  height: var(--d-bh);
+}
+
+.help-art {
+  left: var(--d-ax);
+  top: var(--d-ay);
+  width: var(--d-aw);
+  height: var(--d-ah);
+}
+
+.help-inner {
+  left: var(--d-ix);
+  top: var(--d-iy);
+  width: var(--d-iw);
+  height: var(--d-ih);
+}
+
+.help-text {
+  left: var(--d-tx);
+  top: var(--d-ty);
+  width: var(--d-tw);
+  font-size: 29px;
+  line-height: 34.8px;
+  letter-spacing: -1.74px;
+}
+
+.help-cta {
+  top: 252.188px;
+}
+
+@media (max-width: 810px) {
+  .help-stage {
+    top: 35px;
+    width: 373px;
+    height: 504px;
+  }
+
+  .help-bubble {
+    left: var(--m-bx);
+    top: var(--m-by);
+    width: var(--m-bw);
+    height: var(--m-bh);
+  }
+
+  .help-art {
+    left: var(--m-ax);
+    top: var(--m-ay);
+    width: var(--m-aw);
+    height: var(--m-ah);
+  }
+
+  .help-inner {
+    left: var(--m-ix);
+    top: var(--m-iy);
+    width: var(--m-iw);
+    height: var(--m-ih);
+  }
+
+  .help-text {
+    left: var(--m-tx);
+    top: var(--m-ty);
+    width: var(--m-tw);
+    font-size: 12px;
+    line-height: 14.4px;
+    letter-spacing: -0.72px;
+  }
+
+  .help-cta {
+    top: 216px;
+  }
 }
 
 @keyframes marquee {
