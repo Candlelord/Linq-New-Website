@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { COMPANY, LAST_UPDATED, LEGAL_LINKS } from "@/lib/legal";
+import { COMPANY, LAST_UPDATED, LEGAL_LINKS, RC_NUMBER } from "@/lib/legal";
 
 /* The shell for documents people have to be able to read, so unlike the landing
    page nothing here is measured or fixed-width. `.legal` cancels the body's
@@ -48,7 +48,7 @@ export function LegalPage({
               </Link>
             ))}
           </nav>
-          <p className="m-0 text-[14px] font-light">© 2026 {COMPANY}</p>
+          <p className="m-0 text-[14px] font-light">© 2026 {COMPANY}, RC {RC_NUMBER}</p>
         </div>
       </footer>
     </div>

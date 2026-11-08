@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 import {
   COMPANY,
+  RC_NUMBER,
   SUPPORT_EMAIL,
   SUPPORT_PHONE,
   SUPPORT_PHONE_HREF,
@@ -219,7 +220,7 @@ export default function PrivacyPage() {
 
       <h2>Contact us</h2>
       <p>
-        {COMPANY}
+        {COMPANY} (RC {RC_NUMBER})
         <br />
         Email: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
         <br />
