@@ -9,6 +9,7 @@ import { Cta } from "@/components/cta";
 import { Footer } from "@/components/footer";
 import { SiteNav } from "@/components/site-nav";
 import { Reveal } from "@/components/reveal";
+import { Preloader } from "@/components/preloader";
 
 /* The footer is revealed from behind rather than scrolled to: it is sticky at
    the bottom of this column, and everything above it rides over it on a higher
@@ -20,36 +21,42 @@ import { Reveal } from "@/components/reveal";
    menu overlay — which portals to <body> — no matter how high its own z-index. */
 export default function Page() {
   return (
-    <main className="flex flex-col">
-      <SiteNav />
+    <>
+      <main className="flex flex-col">
+        <SiteNav />
 
-      {/* Hero, SmarterWay and the footer are deliberately not wrapped in Reveal.
-          The hero is the LCP element and the live site gives it no entrance at
-          all; the other two contain `position: sticky` children, which a
-          transformed ancestor would break. */}
-      <div className="relative z-[3] bg-white">
-        <Hero />
-        <Reveal>
-          <Chains />
-        </Reveal>
-        <SmarterWay />
-        <Reveal>
-          <Features />
-        </Reveal>
-        <Reveal>
-          <Faq />
-        </Reveal>
-        <Reveal>
-          <Testimonials />
-        </Reveal>
-        <Reveal>
-          <Help />
-        </Reveal>
-        <Reveal>
-          <Cta />
-        </Reveal>
-      </div>
-      <Footer />
-    </main>
+        {/* Hero, SmarterWay and the footer are deliberately not wrapped in Reveal.
+            The hero is the LCP element and the live site gives it no entrance at
+            all; the other two contain `position: sticky` children, which a
+            transformed ancestor would break. */}
+        <div className="relative z-[3] bg-white">
+          <Hero />
+          <Reveal>
+            <Chains />
+          </Reveal>
+          <SmarterWay />
+          <Reveal>
+            <Features />
+          </Reveal>
+          <Reveal>
+            <Faq />
+          </Reveal>
+          <Reveal>
+            <Testimonials />
+          </Reveal>
+          <Reveal>
+            <Help />
+          </Reveal>
+          <Reveal>
+            <Cta />
+          </Reveal>
+        </div>
+        <Footer />
+      </main>
+      {/* Last child so it paints over the page it is hiding. The page still
+          renders and loads underneath — that is the point. It lives here
+          rather than in the layout so the legal pages open with no curtain. */}
+      <Preloader />
+    </>
   );
 }

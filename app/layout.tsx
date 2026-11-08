@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Mozilla_Headline, Space_Grotesk } from "next/font/google";
-import { Preloader } from "@/components/preloader";
 import "./globals.css";
 
 /* Loaded as a variable font with the width axis, because the word-cycler uses
@@ -34,10 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
-        {/* Last child so it paints over the page it is hiding. The page still
-            renders and loads underneath — that is the point. */}
         {children}
-        <Preloader />
       </body>
     </html>
   );

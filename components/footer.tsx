@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { links } from "@/lib/links";
+import { LEGAL_LINKS } from "@/lib/legal";
 
 /* Measured off the live site. An 800px black panel that does not scroll with
    the page: it is `sticky; bottom: 0` at z-1, pinned to the bottom of the
@@ -84,6 +86,21 @@ export function Footer() {
             </a>
           ))}
         </div>
+
+        <nav
+          aria-label="Legal"
+          className="flex items-center gap-[35px] mob:gap-[14px]"
+        >
+          {LEGAL_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="text-[18px] leading-[24px] font-light tracking-[-0.54px] whitespace-nowrap text-[#fbfbfb] underline-offset-4 hover:underline mob:text-[12px] mob:leading-[16px] mob:tracking-[-0.36px]"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       {/* Gradient-filled wordmark, bleeding off the bottom of the panel. The
