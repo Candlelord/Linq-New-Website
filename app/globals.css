@@ -490,3 +490,67 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Legal pages
+
+   These are reading pages, not part of the measured 1440 composition. Dividing
+   the body's zoom back out gives them real pixel sizes at every viewport. */
+.legal {
+  zoom: calc(1 / var(--zoom));
+}
+
+.legal-prose {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #303030;
+}
+
+.legal-prose h2 {
+  margin: 40px 0 12px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #171717;
+}
+
+.legal-prose h3 {
+  margin: 24px 0 8px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #171717;
+}
+
+.legal-prose p {
+  margin: 0 0 14px;
+}
+
+.legal-prose ul,
+.legal-prose ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
+
+.legal-prose ul {
+  list-style: disc;
+}
+
+.legal-prose ol {
+  list-style: decimal;
+}
+
+.legal-prose li {
+  margin-bottom: 8px;
+}
+
+.legal-prose strong {
+  font-weight: 500;
+  color: #171717;
+}
+
+.legal-prose a {
+  color: var(--color-brand-500);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

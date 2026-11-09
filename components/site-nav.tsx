@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { MenuCoins } from "@/components/menu-coins";
 
 /* Burger is fixed at 102×102, top 38 / right 80. Hover shrinks it to 96.9px and
@@ -13,7 +14,7 @@ import { MenuCoins } from "@/components/menu-coins";
    class cannot outrank an inline style. */
 type Item = {
   label: string;
-  /* An in-page anchor, or null when there is nothing to go to yet. */
+  /* An in-page anchor, a route, or null when there is nothing to go to yet. */
   target: string | null;
   badge?: string;
 };
@@ -22,9 +23,7 @@ const ITEMS: Item[] = [
   { label: "Home", target: "#home" },
   { label: "Features", target: "#features" },
   { label: "FAQs", target: "#faqs" },
-  /* No terms page exists yet, so this stays inert rather than pointing at a
-     section it does not belong to. */
-  { label: "Terms of Use", target: null },
+  { label: "Terms of Use", target: "/terms" },
   { label: "Linq Business", target: null, badge: "Coming soon" },
   { label: "Contact Us", target: "#contact" },
 ];
@@ -165,6 +164,7 @@ function MenuRow({ item, onSelect }: { item: Item; onSelect: () => void }) {
 }
 
 export function SiteNav() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   /* Kept mounted through the close so the overlay can animate out. Unmounting
      on the same tick as `open` flipping is why closing used to just vanish. */
@@ -198,6 +198,10 @@ export function SiteNav() {
   const go = (target: string | null) => {
     if (!target) return;
     close();
+    if (target.startsWith("/")) {
+      router.push(target);
+      return;
+    }
     if (target === "#home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
