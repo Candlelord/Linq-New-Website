@@ -65,7 +65,7 @@ export default function DeleteAccountPage() {
 
       <h2>What we delete</h2>
       <ul>
-        <li>Your profile, including your username and profile photo</li>
+        <li>Your profile, including your username and avatar</li>
         <li>Saved beneficiaries</li>
         <li>Device identifiers and push notification tokens</li>
         <li>Usage data linked to you</li>

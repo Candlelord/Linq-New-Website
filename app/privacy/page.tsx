@@ -31,7 +31,7 @@ export default function PrivacyPage() {
       <ul>
         <li>
           <strong>Account details:</strong> your first and last name, email
-          address, phone number, username, password and profile photo, and any
+          address, phone number, username, password and chosen avatar, and any
           referral code you enter.
         </li>
         <li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
           is removed from your phone once it has been read for upload.
         </li>
         <li>
-          <strong>Photos:</strong> used for your profile photo, and to save
+          <strong>Photos:</strong> used only to save
           receipts when you ask us to.
         </li>
         <li>
